@@ -1,21 +1,15 @@
 #include "Button.h"
 
-class Button {
-private:
-    int _pin;
-    bool _state;
+Button::Button(int pin) : _pin(pin) {
 
-public:
-    Button(int i) : _pin(i) {  };
-
-    bool isPressed() {return _state;};
-
-    void pressed( LED& led ) {
-        led.setState( !led.getState() );
-
-    };
 };
 
+bool Button::isPressed() {
+    return _state;
+};
 
-
-
+void Button::pressed(LED& led) {
+    if (isPressed()) {
+        led.setState(!led.getState());
+    }
+};
