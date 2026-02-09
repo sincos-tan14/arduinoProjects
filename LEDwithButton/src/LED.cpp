@@ -1,16 +1,15 @@
+#include "LED.h"
+#include <Arduino.h>
 
-class LED {
-private:
-    int _pin;
-    bool _state;
+LED::LED(int pin, bool state) : _pin(pin), _state(state) {
+    pinMode(_pin, OUTPUT);
+    digitalWrite(_pin, _state ? HIGH : LOW);
+}
 
+int LED::getPin() const { return _pin; }
+bool LED::getState() const { return _state; }
 
-public:
-    LED(int pin, bool state) : _pin(pin), _state(state) {}
-
-    int getPin() { return _pin; }
-    bool getState() { return _state; }
-    void setState(bool state) {
-        _state = state;
-    };
-};
+void LED::setState(bool state) {
+    _state = state;
+    digitalWrite(_pin, _state ? HIGH : LOW);
+}

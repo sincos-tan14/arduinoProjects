@@ -9,8 +9,8 @@ private:
 
 public:
     LED(int pin, bool state);
-    int getPin();
-    bool getState();
+    int getPin() const;
+    bool getState() const;
     void setState( bool state );
 };
 
