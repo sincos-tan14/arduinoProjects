@@ -1,22 +1,17 @@
 #include <Arduino.h>
-#include "BlinkUtils.h"
+#include "LED.h"
 #include "Button.h"
 
-
-// put function declarations here:
-bool LEDstate;
+LED led(LED_BUILTIN, false);
 Button button(2);
 
 void setup() {
-  // put your setup code here, to run once:
-  int LEDstate = false;
-  pinMode(LED_BUILTIN, OUTPUT);
+  Serial.begin(9600);
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  if ( button.isPressed() ) {
+    button.pressed(led);
+  };
 }
-
-// put function definitions here:

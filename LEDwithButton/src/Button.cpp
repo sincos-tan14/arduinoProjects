@@ -9,6 +9,11 @@ public:
     Button(int i) : _pin(i) {  };
 
     bool isPressed() {return _state;};
+
+    void pressed( LED& led ) {
+        led.setState( !led.getState() );
+
+    };
 };
 
 
