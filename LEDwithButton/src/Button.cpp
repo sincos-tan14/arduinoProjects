@@ -10,11 +10,12 @@ Button::Button(int pin) : _pin(pin) {
     _lastDebounceTime = 0;
 }
 
-Button::Button(int pin, Button& twinButton) : _pin(pin), _twinButton(twinButton) {
+Button::Button(int pin, Button& twinButton) : _pin(pin) {
     pinMode(pin, INPUT_PULLUP);
     _state = HIGH;
     _lastState = HIGH;
     _lastDebounceTime = 0;
+    this->addTwinButton(twinButton);
 }
 
 bool Button::isPressed() {
@@ -40,7 +41,10 @@ bool Button::isPressed() {
 } 
 
 void Button::update(LED& led) {
-    if (isPressed()) {
+    
+    if (isPressed() && _twinButton == nullptr) {
+        led.setState(!led.getState());
+    } else if (isPressed() && _twinButton->isPressed()) {
         led.setState(!led.getState());
     }
 }

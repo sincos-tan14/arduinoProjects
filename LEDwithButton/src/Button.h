@@ -9,7 +9,7 @@ private:
     bool _lastState;
     int _lastDebounceTime;
 
-    Button _twinButton;
+    Button* _twinButton = nullptr;
 
 public:
     Button(int i);
