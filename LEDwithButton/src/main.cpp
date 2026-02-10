@@ -11,7 +11,5 @@ void setup() {
 }
 
 void loop() {
-  if ( button.isPressed() ) {
-    button.pressed(led);
-  };
+  button.update(led);
 }

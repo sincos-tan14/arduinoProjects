@@ -32,7 +32,7 @@ bool Button::isPressed() {
     return detectedPress;
 } 
 
-void Button::pressed(LED& led) {
+void Button::update(LED& led) {
     if (isPressed()) {
         led.setState(!led.getState());
     }

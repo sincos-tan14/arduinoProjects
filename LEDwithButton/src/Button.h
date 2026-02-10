@@ -13,7 +13,7 @@ public:
     Button(int i);
 
     bool isPressed();
-    void pressed(LED& led);
+    void update(LED& led);
 };
 
 
