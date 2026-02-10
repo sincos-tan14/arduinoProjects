@@ -4,7 +4,7 @@
 
 LED led(3, false);
 Button button1(7);
-Button button2(8, button1);
+Button button2(6, button1);
 
 
 
