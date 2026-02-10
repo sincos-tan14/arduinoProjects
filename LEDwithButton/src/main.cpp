@@ -2,8 +2,8 @@
 #include "LED.h"
 #include "Button.h"
 
-LED led(LED_BUILTIN, false);
-Button button(2);
+LED led(3, false);
+Button button(7);
 
 void setup() {
   Serial.begin(9600);

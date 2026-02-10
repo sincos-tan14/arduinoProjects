@@ -9,11 +9,16 @@ private:
     bool _lastState;
     int _lastDebounceTime;
 
+    Button _twinButton;
+
 public:
     Button(int i);
+    Button(int i, Button& twinButton);
 
     bool isPressed();
     void update(LED& led);
+    bool addTwinButton(Button& button);
+    Button* getTwinButton() const;
 };
 
 

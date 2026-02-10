@@ -10,6 +10,13 @@ Button::Button(int pin) : _pin(pin) {
     _lastDebounceTime = 0;
 }
 
+Button::Button(int pin, Button& twinButton) : _pin(pin), _twinButton(twinButton) {
+    pinMode(pin, INPUT_PULLUP);
+    _state = HIGH;
+    _lastState = HIGH;
+    _lastDebounceTime = 0;
+}
+
 bool Button::isPressed() {
     bool detectedPress = false;
     int reading = digitalRead(_pin);
@@ -37,3 +44,15 @@ void Button::update(LED& led) {
         led.setState(!led.getState());
     }
 }
+
+bool Button::addTwinButton(Button& button) {
+    if (_twinButton != nullptr) return false;
+    _twinButton = &button;
+    button.addTwinButton(*this);
+    return true;
+}
+
+Button* Button::getTwinButton() const {
+    return _twinButton;
+}
+
