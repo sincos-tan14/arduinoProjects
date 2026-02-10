@@ -6,6 +6,8 @@ class Button {
 private:
     int _pin;
     bool _state;
+    bool _lastState;
+    int _lastDebounceTime;
 
 public:
     Button(int i);
