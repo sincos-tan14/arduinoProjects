@@ -7,7 +7,7 @@ private:
     int state;
 
 public:
-    Motor(int pin)
+    Motor(int pin);
 }
 
 

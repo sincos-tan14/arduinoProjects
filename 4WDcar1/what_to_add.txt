@@ -1,0 +1,7 @@
+MOTOR
+
+-4 engines making a unit
+	:Class engineUnit
+	:fail it some engine isnt in a unit or if a unit has emoty places
+-setPowerLevel
+	:it should set the power to all engines in the unit
