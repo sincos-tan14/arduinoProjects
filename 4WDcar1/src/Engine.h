@@ -5,7 +5,7 @@ class Engine {
 private:
     const int _pin;
     bool _state;
-    int powerLevel;
+    int _powerLevel;
 
 
 public:
