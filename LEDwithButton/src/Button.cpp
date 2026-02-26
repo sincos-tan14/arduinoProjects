@@ -18,6 +18,10 @@ Button::Button(int pin, Button& twinButton) : _pin(pin) {
     this->addTwinButton(twinButton);
 }
 
+void Button::begin() {
+    pinMode(_pin, INPUT_PULLUP);
+}
+
 bool Button::isPressed() {
     bool detectedPress = false;
     int reading = digitalRead(_pin);
@@ -40,12 +44,19 @@ bool Button::isPressed() {
     return detectedPress;
 } 
 
+bool Button::isHeldDown() const {
+    return digitalRead(_pin) == LOW;
+}
+
 void Button::update(LED& led) {
     
-    if (isPressed() && _twinButton == nullptr) {
-        led.setState(!led.getState());
-    } else if (isPressed() && _twinButton->isPressed()) {
-        led.setState(!led.getState());
+    if (isPressed()) {
+        if (_twinButton == nullptr) {
+            led.setState(!led.getState());
+        } 
+        else if (_twinButton->isHeldDown()) {
+            led.setState(!led.getState());
+        }
     }
 }
 

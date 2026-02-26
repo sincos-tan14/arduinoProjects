@@ -10,9 +10,11 @@ Button button2(6, button1);
 
 void setup() {
   Serial.begin(9600);
-
+  button1.begin();
+  button2.begin();
 }
 
 void loop() {
   button1.update(led);
+  button2.update(led);
 }

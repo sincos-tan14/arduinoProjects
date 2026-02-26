@@ -15,7 +15,9 @@ public:
     Button(int i);
     Button(int i, Button& twinButton);
 
+    void begin();
     bool isPressed();
+    bool isHeldDown() const;
     void update(LED& led);
     bool addTwinButton(Button& button);
     Button* getTwinButton() const;
