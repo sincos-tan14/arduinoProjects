@@ -2,6 +2,9 @@
 #define ENGINEUNIT_H
 #include "Engine.h"
 
+#define MAX_ENGINE_POWER 100
+#define MIN_ENGINE_POWER 0
+
 template <int _memberCount>
 class EngineUnit {
 private:
@@ -22,18 +25,18 @@ public:
         return false;
     }
 
-    bool setPowerLevel(int power) {
+    bool setUnitPowerLevel(int power) {
         if (power <= 100 && power >= 0) {
             for (int i = 0; i < _memberCount; ++i) {
-                enginesPowerLevel[i] = power;
+                engines[i].setPowerLevel(power);
             }
         } else if (power < 0) {
             for (int i = 0; i < _memberCount; ++i) {
-                enginesPowerLevel[i] = 0;
+                engines[i].setPowerLevel(MIN_ENGINE_POWER);
             }            
         } else if (power > 100) {
             for (int i = 0; i < _memberCount; ++i) {
-                enginesPowerLevel[i] = 100;
+                engines[i].setPowerLevel(MAX_ENGINE_POWER);
             }            
         }
     }
@@ -48,7 +51,7 @@ public:
     }
 
 
-    
+
 };
 
 #endif

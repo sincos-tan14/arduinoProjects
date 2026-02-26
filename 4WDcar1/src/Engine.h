@@ -11,6 +11,8 @@ private:
 public:
     Engine(int pin);
 
+    bool setPowerLevel(int power);
+
 };
 
 
