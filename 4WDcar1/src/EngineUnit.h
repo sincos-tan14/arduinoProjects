@@ -38,7 +38,17 @@ public:
         }
     }
 
+    bool isReady() {
+        for (int i = 0; i < _memberCount; i++) {
+            if (engines[i] == nullptr) {
+                return false;
+            }
+        }
+        return true;
+    }
 
+
+    
 };
 
 #endif
