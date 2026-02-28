@@ -37,15 +37,15 @@ public:
     bool setUnitPowerLevel(int power) {
         if (power <= 100 && power >= 0) {
             for (int i = 0; i < _memberCount; ++i) {
-                engines[i].setPowerLevel(power);
+                engines[i]->setPowerLevel(power);
             }
         } else if (power < 0) {
             for (int i = 0; i < _memberCount; ++i) {
-                engines[i].setPowerLevel(MIN_ENGINE_POWER);
+                engines[i]->setPowerLevel(MIN_ENGINE_POWER);
             }            
         } else if (power > 100) {
             for (int i = 0; i < _memberCount; ++i) {
-                engines[i].setPowerLevel(MAX_ENGINE_POWER);
+                engines[i]->setPowerLevel(MAX_ENGINE_POWER);
             }            
         }
         return true;
