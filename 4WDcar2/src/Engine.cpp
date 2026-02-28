@@ -8,11 +8,11 @@ Engine::Engine(int pin) : _pin(pin) {
 Engine::~Engine() { Serial.println("Engine cleaned up.");}
 
 bool Engine::setPowerLevel(int power) {
-        if (power <= 100 && power >= 0) {
+        if (power <= MAX_ENGINE_POWER && power >= MIN_ENGINE_POWER) {
             _powerLevel = power;
-        } else if (power < 0) {
+        } else if (power < MIN_ENGINE_POWER) {
             _powerLevel = MIN_ENGINE_POWER;
-        } else if (power > 100) {
+        } else if (power > MAX_ENGINE_POWER) {
             _powerLevel = MAX_ENGINE_POWER;
         }
         return true;
