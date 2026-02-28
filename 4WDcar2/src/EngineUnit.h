@@ -16,6 +16,7 @@ private:
 
 public:
     EngineUnit() {}
+    ~EngineUnit() override { Serial.println("EngineUnit cleaned up.");};
     
     bool addEngine(Engine& engine) {
         if (_currentEngineCount < _memberCount) {

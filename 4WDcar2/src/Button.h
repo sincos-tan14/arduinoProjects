@@ -12,6 +12,7 @@ private:
 
 public:
     Button(int i);
+    ~Button() override;
 
     void begin();
     bool isPressed();

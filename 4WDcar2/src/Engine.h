@@ -11,6 +11,7 @@ private:
 
 public:
     Engine(int pin);
+    ~Engine() override;
 
     bool isReady() override;
     bool setPowerLevel(int power);

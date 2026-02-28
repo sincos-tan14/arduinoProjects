@@ -5,6 +5,7 @@
 Engine::Engine(int pin) : _pin(pin) {
 
 }
+Engine::~Engine() { Serial.println("Engine cleaned up.");}
 
 bool Engine::setPowerLevel(int power) {
         if (power <= 100 && power >= 0) {

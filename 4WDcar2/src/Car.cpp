@@ -8,7 +8,7 @@ bool Car::setCarSpeed(int i) { _unit->setUnitPowerLevel(i); }
 
 bool Car::isCarReady() {
     for (int i = 0; i < (sizeof(carParts)/sizeof(carParts)); ++i) {
-        
+        carParts[i]->isReady();
     }
 
 }

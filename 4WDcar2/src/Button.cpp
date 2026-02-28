@@ -16,6 +16,8 @@ Button::Button(int pin) : _pin(pin) {
     _lastDebounceTime = 0;
 }
 
+Button::~Button() { Serial.println("Button cleaned up.");}
+
 void Button::begin() {
     pinMode(_pin, INPUT_PULLUP);
 }
