@@ -17,6 +17,7 @@ MOTOR
 [ ] Initialize wireless communication (Bluetooth, WiFi, or Radio module)
 [X] Set initial motor states to STOP to prevent unexpected movement on startup
 [ ] Add a basic test program that can be started with a button
+[ ] Make sure every destructor does what it is supposed to do
 
 --- 2. BASIC MOTOR CONTROL (MANUAL MOVEMENT) ---
 [X] Function: Move Forward (all 4 wheels forward)
