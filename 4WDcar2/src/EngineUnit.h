@@ -3,7 +3,7 @@
 #include "Engine.h"
 #include "CarPart.h"
 
-#define MAX_ENGINE_POWER 100
+#define MAX_ENGINE_POWER 255
 #define MIN_ENGINE_POWER 0
 
 template <int _memberCount>

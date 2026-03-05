@@ -2,7 +2,7 @@
 #include <Arduino.h>
 
 
-Button::Button(int pin) : _pin(pin) {
+Button::Button(int pin, bool isTestButton = false) : _pin(pin), _isTestButton(isTestButton) {
     pinMode(pin, INPUT_PULLUP);
     _state = HIGH;
     _lastState = HIGH;
@@ -42,4 +42,6 @@ bool Button::isHeldDown() const {
 }
 
 bool Button::isReady() {return true;}
+
+bool Button::isTestButton() {return _isTestButton == true ? true : false;}
 

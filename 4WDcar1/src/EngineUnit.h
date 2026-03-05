@@ -8,7 +8,7 @@
 template <int _memberCount>
 class EngineUnit {
 private:
-    Motor* engines[_memberCount];
+    Engine* engines[_memberCount];
     int _currentEngineCount;
     int enginesPowerLevel[_memberCount];
 
@@ -43,7 +43,7 @@ public:
 
     bool isReady() {
         for (int i = 0; i < _memberCount; i++) {
-            if (engines[i] == nullptr) {
+            if (engines[i] == 0) {
                 return false;
             }
         }

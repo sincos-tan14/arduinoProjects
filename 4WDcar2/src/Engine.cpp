@@ -1,5 +1,5 @@
 #include "Engine.h"
-#define MAX_ENGINE_POWER 100
+#define MAX_ENGINE_POWER 255
 #define MIN_ENGINE_POWER 0
 
 Engine::Engine(int pin) : _pin(pin) {

@@ -8,16 +8,18 @@ private:
     bool _state;
     bool _lastState;
     int _lastDebounceTime;
+    bool _isTestButton;
 
 
 public:
-    Button(int i);
+    Button(int pin, bool isTestButton = false);
     ~Button() override;
 
     void begin();
     bool isPressed();
     bool isHeldDown() const;
     bool isReady() override;
+    bool isTestButton();
 };
 
 

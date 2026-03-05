@@ -7,3 +7,46 @@ MOTOR
 	:fail it some engine isnt in a unit or if a unit has emoty places
 -setPowerLevel
 	:it should set the power to all engines in the unit DONE
+
+4WD ARDUINO CAR SOFTWARE CHECKLIST
+
+--- 1. INITIALIZATION & SETUP ---
+[X] Define motor control pins (Direction and PWM/Speed)
+[ ] Define sensor pins (Ultrasonic, IR, Encoders, etc.)
+[X] Initialize Serial communication for debugging
+[ ] Initialize wireless communication (Bluetooth, WiFi, or Radio module)
+[X] Set initial motor states to STOP to prevent unexpected movement on startup
+[ ] Add a basic test program that can be started with a button
+
+--- 2. BASIC MOTOR CONTROL (MANUAL MOVEMENT) ---
+[X] Function: Move Forward (all 4 wheels forward)
+[ ] Function: Move Backward (all 4 wheels backward)
+[ ] Function: Turn Left (left wheels backward, right wheels forward)
+[ ] Function: Turn Right (right wheels backward, left wheels forward)
+[ ] Function: Stop (all 4 wheels stop immediately)
+[X] Function: Set Motor Speed (PWM control mapped from 0-255)
+[ ] Function: Individual motor control (helpful for testing wiring)
+
+--- 3. COMMUNICATION & COMMAND HANDLING ---
+[ ] Read incoming commands from the wireless module/controller
+[ ] Parse commands efficiently (e.g., 'F' = forward, 'S' = stop, 'V150' = speed 150)
+[ ] Failsafe: Automatically stop motors if the control signal is lost for more than 500ms
+[ ] Send telemetry back to the controller (e.g., battery level, current state, ping)
+
+--- 4. SENSOR INTEGRATION (IF USING) ---
+[ ] Read Ultrasonic sensor distance (Trigger/Echo timing to cm/inches)
+[ ] Read Line Tracking IR sensors (Digital High/Low or Analog read)
+[ ] Read Wheel Encoders (Interrupts to count ticks for distance/speed)
+[ ] Monitor Battery Voltage (Analog read with a voltage divider)
+
+--- 5. AUTONOMOUS BEHAVIORS & SAFETY ---
+[ ] Obstacle Avoidance Logic: Stop and turn if ultrasonic distance is < 15 cm
+[ ] Line Following Logic: Adjust left/right motor speeds based on IR sensor states
+[ ] Edge Detection: Stop and reverse if a drop-off is detected
+[ ] Low Battery Warning: Flash an LED or stop driving if voltage drops too low
+
+--- 6. ADVANCED CONTROL & ARCHITECTURE (OPTIONAL) ---
+[ ] PID Controller: Use encoder feedback to ensure the car drives perfectly straight
+[ ] Odometry: Calculate distance traveled and current X/Y position
+[ ] State Machine: Manage modes cleanly (e.g., Idle Mode, Manual Mode, Auto Mode)
+[ ] Non-blocking delays: Use millis() instead of delay() so the car remains responsive
