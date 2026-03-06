@@ -43,7 +43,7 @@ public:
             for (int i = 0; i < _memberCount; ++i) {
                 engines[i]->setPowerLevel(MIN_ENGINE_POWER);
             }            
-        } else if (power > 100) {
+        } else if (power > 100) { 
             for (int i = 0; i < _memberCount; ++i) {
                 engines[i]->setPowerLevel(MAX_ENGINE_POWER);
             }            

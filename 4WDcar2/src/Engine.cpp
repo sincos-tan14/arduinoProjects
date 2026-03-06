@@ -2,9 +2,8 @@
 #define MAX_ENGINE_POWER 255
 #define MIN_ENGINE_POWER 0
 
-Engine::Engine(int pin) : _pin(pin) {
+Engine::Engine(int pin, int location) : _pin(pin),  _location(location)  {}
 
-}
 Engine::~Engine() { Serial.println("Engine cleaned up.");}
 
 bool Engine::setPowerLevel(int power) {
