@@ -4,7 +4,11 @@
 #include "CarPart.h"
 
 #define MAX_ENGINE_POWER 255
-#define MIN_ENGINE_POWER 0
+#define MIN_ENGINE_POWER 0 
+
+#define DEFAULT_TURN_SPEED 150
+#define TIME_FOR_90_DEG 600
+
 
 template <int _memberCount>
 class EngineUnit : public CarPart{
@@ -13,9 +17,18 @@ private:
     int _currentEngineCount;
     int enginesPowerLevel[_memberCount];
 
+    bool _isTurning;
+    unsigned long _turnStartTime;
+    unsigned long _turnDurationMs;
 
 public:
-    EngineUnit() {}
+    EngineUnit() {
+        _currentEngineCount = 0;
+        _isTurning = false;
+        _turnStartTime = 0;
+        _turnDurationMs = 0;
+
+    }
     ~EngineUnit() override { Serial.println("EngineUnit cleaned up.");};
     
     bool addEngine(Engine& engine) {
@@ -35,15 +48,15 @@ public:
     }
 
     bool setUnitPowerLevel(int power) {
-        if (power <= 100 && power >= 0) {
+        if (power <= MAX_ENGINE_POWER && power >= MIN_ENGINE_POWER) {
             for (int i = 0; i < _memberCount; ++i) {
                 engines[i]->setPowerLevel(power);
             }
-        } else if (power < 0) {
+        } else if (power < MIN_ENGINE_POWER) {
             for (int i = 0; i < _memberCount; ++i) {
                 engines[i]->setPowerLevel(MIN_ENGINE_POWER);
             }            
-        } else if (power > 100) { 
+        } else if (power > MAX_ENGINE_POWER) { 
             for (int i = 0; i < _memberCount; ++i) {
                 engines[i]->setPowerLevel(MAX_ENGINE_POWER);
             }            
@@ -58,6 +71,26 @@ public:
             }
         }
         return true;
+    }
+
+
+    // function is not ready, we have yet to give command to engines to move
+    bool turn(int angle) {
+        int true_angle;
+        
+        if (angle < 0) {
+            true_angle = -(angle % 360);
+        } else {
+            true_angle = (angle % 360);
+        }
+
+        _turnDurationMs = (true_angle / 90.0) * TIME_FOR_90_DEG;
+
+
+        _turnStartTime = millis();
+        _isTurning = true;
+
+        return true
     }
 
 
