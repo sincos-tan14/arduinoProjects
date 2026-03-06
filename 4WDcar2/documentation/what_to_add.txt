@@ -3,10 +3,11 @@ MOTOR
 -adding the real physical spesifications of the engines 
 
 -4 engines making a unit
-	:Class engineUnit DONE
-	:fail it some engine isnt in a unit or if a unit has emoty places
+[X] Class engineUnit
+[ ] fail if some engine isnt in a unit or if a unit has emoty places
+
 -setPowerLevel
-	:it should set the power to all engines in the unit DONE
+[X] it should set the power to all engines in the unit
 
 4WD ARDUINO CAR SOFTWARE CHECKLIST
 
