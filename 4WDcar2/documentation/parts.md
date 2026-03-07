@@ -94,6 +94,12 @@ When the driving voltage is between 7V and 12V, the onboard 5V logic power suppl
 When the driving voltage is higher than 12V and less than or equal to 24V (although the chip manual suggests supporting 35V, it is recommended to conservatively apply a maximum voltage of 24V, for example, to drive a motor with a rated voltage of 18V). In this case, you must first remove the onboard 5V output enable jumper cap and then access the 5V power supply through the external 5V output port. The 5V enable power acts as a control signal with a level of 5V. When the signal input is valid and the motor drive module power supply is normal, the module outputs current. Otherwise, even if the power supply is normal, there will be no current output to the motor.
 
 
+== important ==
+The Power Block (Usually a 3-pin blue screw terminal)
+12V (Power Input): This is where the positive red wire from your main battery pack goes. (Even if your battery is 7.4V or 9V, it goes here).
+GND (Ground): The negative black wire from your battery goes here. Crucial rule: You MUST also run a wire from this GND terminal to a GND pin on your Arduino. If they don't share a common ground, the signals won't work.
+5V (Power Output): The L298N has a built-in voltage regulator. It takes the big battery voltage and drops it down to a safe 5V. You can actually run a wire from this 5V terminal to the 5V or VIN pin on your Arduino to power the Arduino without needing a second battery!
+
 ![alt text](image-6.png)
 ![alt text](image-7.png)
 
