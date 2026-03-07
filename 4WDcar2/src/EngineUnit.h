@@ -90,7 +90,7 @@ public:
         _turnStartTime = millis();
         _isTurning = true;
 
-        return true
+        return true;
     }
 
 
