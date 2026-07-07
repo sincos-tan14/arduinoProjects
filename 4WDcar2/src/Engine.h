@@ -21,6 +21,7 @@ public:
     void setDirection(bool forward);
     void brake();
     bool isReady();
+    int getLocation() const { return _location; }
 };
 
 #endif

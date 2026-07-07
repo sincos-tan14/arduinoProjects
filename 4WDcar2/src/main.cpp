@@ -2,54 +2,70 @@
 #include "EngineUnit.h"
 #include <Arduino.h>
 
-// Left side motors wired in parallel to L298N Channel A (ENA, IN1, IN2)
-Engine engineLeft(3, 4, 5, 1); 
-
-// Right side motors wired in parallel to L298N Channel B (ENB, IN3, IN4)
+// Left side motors (L298N Channel A), Location ID: 1 (LOC_LEFT)
+Engine engineLeft(3, 4, 5, 1);
+// Right side motors (L298N Channel B), Location ID: 2 (LOC_RIGHT)
 Engine engineRight(6, 7, 8, 2);
 
-EngineUnit<4> unit;
+// FIXED: The controller only has 2 channels
+EngineUnit<2> unit;
 
-// Error handling function to halt the system in case of critical errors
 void haltSystem() {
-  Serial.println("CRITICAL ERROR: The unit is not ready. System halted.");
-  
+  Serial.println("CRITICAL ERROR: The Unit is not ready. System halted.");
   pinMode(LED_BUILTIN, OUTPUT);
-  
-  
   while (true) {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(100);
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(100);
+    digitalWrite(LED_BUILTIN, HIGH); delay(100);
+    digitalWrite(LED_BUILTIN, LOW); delay(100);
   }
 }
 
-void testRun() {
-  if (!unit.isReady()) {
-    Serial.println("Halting system called from testRun() due to unit not being ready.");
-    haltSystem();
-  }
+// --- Non-blocking test variables ---
+unsigned long testStartTime = 0;
+bool isTestRunning = false;
 
+void startTestRun() {
+  Serial.println("Starting test run (2 seconds)...");
   unit.setUnitPowerLevel(50);
-  delay(2000); // Run for 2 seconds
+  testStartTime = millis();
+  isTestRunning = true;
+}
 
-  unit.setUnitPowerLevel(0);
+void updateTestRun() {
+  // If the test is running and 2000 milliseconds have passed (without delay)
+  if (isTestRunning && (millis() - testStartTime >= 2000)) {
+    unit.setUnitPowerLevel(0);
+    isTestRunning = false;
+    Serial.println("Test run completed.");
+  }
 }
 
 void setup() {
   Serial.begin(9600);
-  delay(1000); 
+  delay(1000);
 
-  // Syntax error fixed, and safe shutdown called
+  // STEP 1: Set up pins and stop motors
+  engineLeft.init();
+  engineRight.init();
+
+  // STEP 2: Assign motors to the Unit
+  unit.addEngine(engineLeft);
+  unit.addEngine(engineRight);
+
+  // STEP 3: Verification
   if (!unit.isReady()) {
     haltSystem();
   }
 
-  Serial.println("System initialized successfully. Starting...");
+  Serial.println("System successfully initialized. Starting...");
+  
+  // Run test once at startup
+  startTestRun(); 
 }
 
 void loop() {
-  testRun();
-  return;
+  // FIXED: Must be updated continuously for the turn() timer to work
+  unit.update(); 
+  
+  // FIXED: Non-blocking test process check without delay()
+  updateTestRun(); 
 }

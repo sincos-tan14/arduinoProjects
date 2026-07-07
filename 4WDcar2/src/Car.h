@@ -5,12 +5,12 @@
 
 class Car {
 private:
-    const Button* const _startButton;
-    EngineUnit<4>* const _unit;
-    CarPart* carParts[1];
+    Button* _startButton;
+    EngineUnit<2>* const _unit;
+    CarPart* carParts[2];
 
 public:
-    Car(EngineUnit<4>* unit, Button* startButton);
+    Car(EngineUnit<2>* unit, Button* startButton);
     bool setCarSpeed(int i);
     bool isCarReady();
 };
