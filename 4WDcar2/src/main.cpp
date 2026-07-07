@@ -58,14 +58,17 @@ void setup() {
 
   Serial.println("System successfully initialized. Starting...");
   
+  // todo
   // Run test once at startup
   startTestRun(); 
 }
 
 void loop() {
+  // todo
   // FIXED: Must be updated continuously for the turn() timer to work
   unit.update(); 
   
+  // todo
   // FIXED: Non-blocking test process check without delay()
   updateTestRun(); 
 }
