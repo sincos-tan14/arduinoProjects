@@ -1,0 +1,404 @@
+#include "Button.h"
+#include <Arduino.h>
+
+
+Button::Button(int pin, bool isTestButton = false) : _pin(pin), _isTestButton(isTestButton) {
+    pinMode(pin, INPUT_PULLUP);
+    _state = HIGH;
+    _lastState = HIGH;
+    _lastDebounceTime = 0;
+}
+
+Button::~Button() { Serial.println("Button cleaned up.");}
+
+void Button::begin() {
+    pinMode(_pin, INPUT_PULLUP);
+}
+
+bool Button::isPressed() {
+    bool detectedPress = false;
+    int reading = digitalRead(_pin);
+
+    if (reading != _lastState) {
+        _lastDebounceTime = millis();
+    }
+
+    if ((millis() - _lastDebounceTime) > 50) {
+        
+        if (reading != _state) {
+            _state = reading;
+
+            if (_state == LOW) {
+                detectedPress = true;
+            }
+        }
+    }
+    _lastState = reading;
+    return detectedPress;
+} 
+
+bool Button::isHeldDown() const {
+    return digitalRead(_pin) == LOW;
+}
+
+bool Button::isReady() {return true;}
+
+bool Button::isTestButton() {return _isTestButton == true ? true : false;}
+
+#ifndef BUTTON_H
+#define BUTTON_H
+#include "CarPart.h"
+
+class Button : public CarPart {
+private:
+    int _pin;
+    bool _state;
+    bool _lastState;
+    int _lastDebounceTime;
+    bool _isTestButton;
+
+
+public:
+    Button(int pin, bool isTestButton = false);
+    ~Button() override;
+
+    void begin();
+    bool isPressed();
+    bool isHeldDown() const;
+    bool isReady() override;
+    bool isTestButton();
+};
+
+
+
+
+#endif
+#include "Button.h"
+#include "EngineUnit.h"
+#include "Car.h"
+
+Car::Car(EngineUnit<4>* unit, Button* startButton) : _startButton(startButton), _unit(unit) { }
+
+bool Car::setCarSpeed(int i) { return _unit->setUnitPowerLevel(i); }
+
+bool Car::isCarReady() {
+    for (unsigned int i = 0; i < (sizeof(carParts)/sizeof(carParts)); ++i) {
+        if (!(carParts[i]->isReady())) return false;
+    }
+    return true;
+}#ifndef CAR_H
+#define CAR_H
+#include "Button.h"
+#include "EngineUnit.h"
+
+class Car {
+private:
+    const Button* const _startButton;
+    EngineUnit<4>* const _unit;
+    CarPart* carParts[1];
+
+public:
+    Car(EngineUnit<4>* unit, Button* startButton);
+    bool setCarSpeed(int i);
+    bool isCarReady();
+};
+
+
+#endif#ifndef CAR_PART_H
+#define CAR_PART_H
+#include <Arduino.h>
+
+class CarPart {
+public:
+    virtual bool isReady() = 0;
+    virtual ~CarPart() { Serial.println("CarPart cleaned up.");}
+private:
+    int _pin;
+
+};
+
+#endif#include "Engine.h"
+
+#define MAX_ENGINE_POWER 255
+#define MIN_ENGINE_POWER 0
+
+Engine::Engine(int pinPWM, int pinIN1, int pinIN2, int location) 
+    : _pinPWM(pinPWM), _pinIN1(pinIN1), _pinIN2(pinIN2), _location(location), _powerLevel(0) {}
+
+Engine::~Engine() { 
+    brake(); // Ensure motor stops if object is destroyed
+    Serial.println("Engine cleaned up.");
+}
+
+// Configures the pins. Must be called inside your main setup()
+void Engine::init() {
+    pinMode(_pinPWM, OUTPUT);
+    pinMode(_pinIN1, OUTPUT);
+    pinMode(_pinIN2, OUTPUT);
+    
+    // Ensure motor starts in a stopped state
+    brake();
+}
+
+// Sets the wattage/speed via PWM to the Enable pin
+bool Engine::setPowerLevel(int power) {
+    if (power <= MAX_ENGINE_POWER && power >= MIN_ENGINE_POWER) {
+        _powerLevel = power;
+    } else if (power < MIN_ENGINE_POWER) {
+        _powerLevel = MIN_ENGINE_POWER;
+    } else if (power > MAX_ENGINE_POWER) {
+        _powerLevel = MAX_ENGINE_POWER;
+    }
+    
+    // ESP32 standard PWM write to the L298N Enable pin
+    analogWrite(_pinPWM, _powerLevel);
+    
+    return true;
+}
+
+// Sets the H-Bridge logic to determine rotation direction
+void Engine::setDirection(bool forward) {
+    if (forward) {
+        digitalWrite(_pinIN1, HIGH);
+        digitalWrite(_pinIN2, LOW);
+    } else {
+        digitalWrite(_pinIN1, LOW);
+        digitalWrite(_pinIN2, HIGH);
+    }
+}
+
+// Stops the motor by pulling both direction pins to the same state
+void Engine::brake() {
+    digitalWrite(_pinIN1, LOW);
+    digitalWrite(_pinIN2, LOW);
+    analogWrite(_pinPWM, 0);
+    _powerLevel = 0;
+}
+
+bool Engine::isReady() {
+    // Basic validation: ensure pins are valid ESP32-C3 GPIOs (0-21)
+    if (_pinPWM >= 0 && _pinIN1 >= 0 && _pinIN2 >= 0) {
+        return true;
+    }
+    return false;
+}#ifndef ENGINE_H
+#define ENGINE_H
+
+#include <Arduino.h>
+
+class Engine {
+private:
+    int _pinPWM;   // Connects to ENA or ENB on L298N
+    int _pinIN1;   // Connects to IN1 or IN3
+    int _pinIN2;   // Connects to IN2 or IN4
+    int _location;
+    int _powerLevel;
+
+public:
+    // Constructor now requires all 3 control pins
+    Engine(int pinPWM, int pinIN1, int pinIN2, int location);
+    ~Engine();
+
+    void init(); // Call this in setup()
+    bool setPowerLevel(int power);
+    void setDirection(bool forward);
+    void brake();
+    bool isReady();
+};
+
+#endif#ifndef ENGINEUNIT_H
+#define ENGINEUNIT_H
+#include "Engine.h"
+#include "CarPart.h"
+
+#define MAX_ENGINE_POWER 255
+#define MIN_ENGINE_POWER 0 
+
+#define DEFAULT_TURN_SPEED 150
+#define TIME_FOR_90_DEG 600
+
+// Define locations to help the Unit know how to steer
+#define LOC_LEFT 1
+#define LOC_RIGHT 2
+
+template <int _memberCount>
+class EngineUnit : public CarPart {
+private:
+    Engine* engines[_memberCount];
+    int _currentEngineCount;
+    
+    bool _isTurning;
+    unsigned long _turnStartTime;
+    unsigned long _turnDurationMs;
+
+public:
+    EngineUnit() {
+        _currentEngineCount = 0;
+        _isTurning = false;
+        _turnStartTime = 0;
+        _turnDurationMs = 0;
+    }
+    
+    ~EngineUnit() override { 
+        Serial.println("EngineUnit cleaned up.");
+    }
+    
+    bool addEngine(Engine& engine) {
+        if (_currentEngineCount < _memberCount) {
+            engines[_currentEngineCount] = &engine;
+            _currentEngineCount++;
+            return true;
+        }
+        return false;
+    }
+
+    bool addEngines(Engine* newEngines, int numberOfEngines) {
+        bool success = true;
+        for (int i = 0; i < numberOfEngines; ++i) {
+            if (!addEngine(newEngines[i])) {
+                success = false;
+            }
+        }
+        return success;
+    }
+
+    bool setUnitPowerLevel(int power) {
+        // Constrain power mathematically before applying to avoid redundant checks in the loop
+        int constrainedPower = constrain(power, MIN_ENGINE_POWER, MAX_ENGINE_POWER);
+        
+        for (int i = 0; i < _currentEngineCount; ++i) {
+            engines[i]->setPowerLevel(constrainedPower);
+        }
+        return true;
+    }
+
+    // Stops all engines
+    void stopAll() {
+        for (int i = 0; i < _currentEngineCount; ++i) {
+            engines[i]->brake();
+        }
+    }
+
+    bool isReady() override {
+        // Check if the array is fully populated up to the expected _memberCount
+        if (_currentEngineCount != _memberCount) return false;
+        
+        for (int i = 0; i < _currentEngineCount; i++) {
+            if (engines[i] == nullptr || !engines[i]->isReady()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Initiates the turn sequence
+    bool turn(int angle) {
+        if (_isTurning) return false; // Prevent overlapping turn commands
+
+        int true_angle = abs(angle % 360);
+        bool turnRight = (angle > 0);
+
+        _turnDurationMs = (true_angle / 90.0) * TIME_FOR_90_DEG;
+        _turnStartTime = millis();
+        _isTurning = true;
+
+        // Command the engines based on their location
+        for (int i = 0; i < _currentEngineCount; i++) {
+            engines[i]->setPowerLevel(DEFAULT_TURN_SPEED);
+            
+            // Skid-steer logic: 
+            // Turning Right: Left wheels go forward, Right wheels go backward
+            if (engines[i]->getLocation() == LOC_LEFT) {
+                engines[i]->setDirection(turnRight ? true : false); 
+            } else if (engines[i]->getLocation() == LOC_RIGHT) {
+                engines[i]->setDirection(turnRight ? false : true);
+            }
+        }
+        return true;
+    }
+
+    // MUST be called inside the main loop() to handle the timer
+    void update() {
+        if (_isTurning) {
+            // Check if the elapsed time exceeds the target duration
+            if (millis() - _turnStartTime >= _turnDurationMs) {
+                stopAll();
+                _isTurning = false;
+            }
+        }
+    }
+};
+
+#endif#ifndef MOTORDRIVER_H
+#define MOTORDRIVER_H
+
+#include "CarPart.h"
+
+class MotorDriver : public CarPart {
+private:
+
+
+
+
+
+public:
+
+};
+
+
+
+#endif#include "Engine.h"
+#include "EngineUnit.h"
+#include <Arduino.h>
+
+// Left side motors wired in parallel to L298N Channel A (ENA, IN1, IN2)
+Engine engineLeft(3, 4, 5, 1); 
+
+// Right side motors wired in parallel to L298N Channel B (ENB, IN3, IN4)
+Engine engineRight(6, 7, 8, 2);
+
+EngineUnit<4> unit;
+
+// Error handling function to halt the system in case of critical errors
+void haltSystem() {
+  Serial.println("CRITICAL ERROR: The unit is not ready. System halted.");
+  
+  pinMode(LED_BUILTIN, OUTPUT);
+  
+  
+  while (true) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(100);
+  }
+}
+
+void testRun() {
+  if (!unit.isReady()) {
+    Serial.println("Halting system called from testRun() due to unit not being ready.");
+    haltSystem();
+  }
+
+  unit.setUnitPowerLevel(50);
+  delay(2000); // Run for 2 seconds
+
+  unit.setUnitPowerLevel(0);
+}
+
+void setup() {
+  Serial.begin(9600);
+  delay(1000); 
+
+  // Syntax error fixed, and safe shutdown called
+  if (!unit.isReady()) {
+    haltSystem();
+  }
+
+  Serial.println("System initialized successfully. Starting...");
+}
+
+void loop() {
+  testRun();
+  return;
+}

@@ -9,14 +9,16 @@
 #define DEFAULT_TURN_SPEED 150
 #define TIME_FOR_90_DEG 600
 
+// Define locations to help the Unit know how to steer
+#define LOC_LEFT 1
+#define LOC_RIGHT 2
 
 template <int _memberCount>
-class EngineUnit : public CarPart{
+class EngineUnit : public CarPart {
 private:
     Engine* engines[_memberCount];
     int _currentEngineCount;
-    int enginesPowerLevel[_memberCount];
-
+    
     bool _isTurning;
     unsigned long _turnStartTime;
     unsigned long _turnDurationMs;
@@ -27,9 +29,11 @@ public:
         _isTurning = false;
         _turnStartTime = 0;
         _turnDurationMs = 0;
-
     }
-    ~EngineUnit() override { Serial.println("EngineUnit cleaned up.");};
+    
+    ~EngineUnit() override { 
+        Serial.println("EngineUnit cleaned up.");
+    }
     
     bool addEngine(Engine& engine) {
         if (_currentEngineCount < _memberCount) {
@@ -40,61 +44,81 @@ public:
         return false;
     }
 
-    bool addEngines(Engine* engines, int numberOfEngines) {
+    bool addEngines(Engine* newEngines, int numberOfEngines) {
+        bool success = true;
         for (int i = 0; i < numberOfEngines; ++i) {
-            addEngine(engines[i]);
+            if (!addEngine(newEngines[i])) {
+                success = false;
+            }
         }
-        return true;
+        return success;
     }
 
     bool setUnitPowerLevel(int power) {
-        if (power <= MAX_ENGINE_POWER && power >= MIN_ENGINE_POWER) {
-            for (int i = 0; i < _memberCount; ++i) {
-                engines[i]->setPowerLevel(power);
-            }
-        } else if (power < MIN_ENGINE_POWER) {
-            for (int i = 0; i < _memberCount; ++i) {
-                engines[i]->setPowerLevel(MIN_ENGINE_POWER);
-            }            
-        } else if (power > MAX_ENGINE_POWER) { 
-            for (int i = 0; i < _memberCount; ++i) {
-                engines[i]->setPowerLevel(MAX_ENGINE_POWER);
-            }            
+        // Constrain power mathematically before applying to avoid redundant checks in the loop
+        int constrainedPower = constrain(power, MIN_ENGINE_POWER, MAX_ENGINE_POWER);
+        
+        for (int i = 0; i < _currentEngineCount; ++i) {
+            engines[i]->setPowerLevel(constrainedPower);
         }
         return true;
     }
 
+    // Stops all engines
+    void stopAll() {
+        for (int i = 0; i < _currentEngineCount; ++i) {
+            engines[i]->brake();
+        }
+    }
+
     bool isReady() override {
-        for (int i = 0; i < _memberCount; i++) {
-            if (engines[i] == 0) {
+        // Check if the array is fully populated up to the expected _memberCount
+        if (_currentEngineCount != _memberCount) return false;
+        
+        for (int i = 0; i < _currentEngineCount; i++) {
+            if (engines[i] == nullptr || !engines[i]->isReady()) {
                 return false;
             }
         }
         return true;
     }
 
-
-    // function is not ready, we have yet to give command to engines to move
+    // Initiates the turn sequence
     bool turn(int angle) {
-        int true_angle;
-        
-        if (angle < 0) {
-            true_angle = -(angle % 360);
-        } else {
-            true_angle = (angle % 360);
-        }
+        if (_isTurning) return false; // Prevent overlapping turn commands
+
+        int true_angle = abs(angle % 360);
+        bool turnRight = (angle > 0);
 
         _turnDurationMs = (true_angle / 90.0) * TIME_FOR_90_DEG;
-
-
         _turnStartTime = millis();
         _isTurning = true;
 
+        // Command the engines based on their location
+        for (int i = 0; i < _currentEngineCount; i++) {
+            engines[i]->setPowerLevel(DEFAULT_TURN_SPEED);
+            
+            // Skid-steer logic: 
+            // Turning Right: Left wheels go forward, Right wheels go backward
+            if (engines[i]->getLocation() == LOC_LEFT) {
+                engines[i]->setDirection(turnRight ? true : false); 
+            } else if (engines[i]->getLocation() == LOC_RIGHT) {
+                engines[i]->setDirection(turnRight ? false : true);
+            }
+        }
         return true;
     }
 
-
-
+    // MUST be called inside the main loop() to handle the timer
+    void update() {
+        if (_isTurning) {
+            // Check if the elapsed time exceeds the target duration
+            if (millis() - _turnStartTime >= _turnDurationMs) {
+                stopAll();
+                _isTurning = false;
+            }
+        }
+    }
 };
 
 #endif
